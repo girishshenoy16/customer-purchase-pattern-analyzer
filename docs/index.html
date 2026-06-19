@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Purchase Pattern Analyser — PactQ Executive Dashboard</title>
+  <meta name="description" content="CEO/CFO executive intelligence dashboard for PactQ — Customer purchase patterns, revenue, segmentation and channel analytics.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ═══════ TOP HEADER BAR ═══════ -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="brand">
+        <div class="brand-badge">P</div>
+        <div>
+          <span class="brand-name">PactQ Group</span>
+          <span class="brand-sub">Customer Intelligence Platform</span>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <nav class="tab-nav">
+        <button class="tab-btn active" data-page="p1" id="tab-p1">
+          <i class="fa-solid fa-chart-line"></i> Revenue Overview
+        </button>
+        <button class="tab-btn" data-page="p2" id="tab-p2">
+          <i class="fa-solid fa-users"></i> Customer Behaviour
+        </button>
+        <button class="tab-btn" data-page="p3" id="tab-p3">
+          <i class="fa-solid fa-boxes-stacked"></i> Product &amp; Channel
+        </button>
+        <button class="tab-btn" data-page="p4" id="tab-p4">
+          <i class="fa-solid fa-hand-holding-dollar"></i> CFO Strategic Insights
+        </button>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      <span class="pill pill-live"><i class="fa-solid fa-circle-dot blink"></i> Live</span>
+      <span class="pill pill-fy">FY 2025</span>
+      <span class="topbar-date" id="topbar-date">—</span>
+    </div>
+  </header>
+
+  <div class="workspace">
+
+    <!-- ═══════ GLOBAL FILTER SIDEBAR ═══════ -->
+    <aside class="sidebar">
+      <div class="sidebar-title"><i class="fa-solid fa-sliders"></i> Global Filters</div>
+
+      <!-- Sidebar Header Metrics -->
+      <div class="sidebar-current-view">
+        <div class="current-view-title">Current View Snapshot</div>
+        <div class="current-view-row"><span>Revenue:</span> <strong id="side-rev">—</strong></div>
+        <div class="current-view-row"><span>Transactions:</span> <strong id="side-txn">—</strong></div>
+        <div class="current-view-row"><span>Net Margin:</span> <strong id="side-margin">—</strong></div>
+      </div>
+
+      <!-- Active Filter Summary -->
+      <div class="active-filters-card" id="active-filters-summary">
+        <div class="active-filters-title">Active Filters</div>
+        <div class="active-filters-empty">No active filters (showing baseline)</div>
+      </div>
+
+      <!-- Date Range (Not collapsible) -->
+      <div class="filter-group">
+        <div class="filter-group-header-static">
+          <label><i class="fa-solid fa-calendar-days"></i> Date Range</label>
+          <span class="sidebar-badge">FY 2025</span>
+        </div>
+        <div class="date-inputs" style="margin-top: 8px;">
+          <input type="date" id="filter-date-from" class="date-input" value="2025-01-01">
+          <span class="date-sep">to</span>
+          <input type="date" id="filter-date-to"   class="date-input" value="2025-12-31">
+        </div>
+        <div class="quick-dates">
+          <button class="btn-quick-date active" data-range="fy">FY25</button>
+          <button class="btn-quick-date" data-range="q1">Q1</button>
+          <button class="btn-quick-date" data-range="q2">Q2</button>
+          <button class="btn-quick-date" data-range="q3">Q3</button>
+          <button class="btn-quick-date" data-range="q4">Q4</button>
+        </div>
+      </div>
+
+      <!-- Collapsible Groups -->
+      <div class="filter-group collapsible">
+        <div class="filter-group-header">
+          <label><i class="fa-solid fa-map-location-dot"></i> Region</label>
+          <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="filter-group-content">
+          <div class="chip-group" id="chips-region"></div>
+        </div>
+      </div>
+
+      <div class="filter-group collapsible">
+        <div class="filter-group-header">
+          <label><i class="fa-solid fa-user-tag"></i> Customer Segment</label>
+          <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="filter-group-content">
+          <div class="chip-group" id="chips-segment"></div>
+        </div>
+      </div>
+
+      <div class="filter-group collapsible">
+        <div class="filter-group-header">
+          <label><i class="fa-solid fa-id-card"></i> Loyalty Status</label>
+          <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="filter-group-content">
+          <div class="chip-group" id="chips-loyalty"></div>
+        </div>
+      </div>
+
+      <div class="filter-group collapsible">
+        <div class="filter-group-header">
+          <label><i class="fa-solid fa-store"></i> Purchase Channel</label>
+          <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="filter-group-content">
+          <div class="chip-group" id="chips-channel"></div>
+        </div>
+      </div>
+
+      <div class="filter-group collapsible">
+        <div class="filter-group-header">
+          <label><i class="fa-solid fa-people-group"></i> Age Group</label>
+          <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="filter-group-content">
+          <div class="chip-group" id="chips-age"></div>
+        </div>
+      </div>
+
+      <div class="filter-group collapsible">
+        <div class="filter-group-header">
+          <label><i class="fa-solid fa-venus-mars"></i> Gender</label>
+          <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="filter-group-content">
+          <div class="chip-group" id="chips-gender"></div>
+        </div>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="btn-reset" id="btn-reset"><i class="fa-solid fa-rotate"></i> Reset All Filters</button>
+      </div>
+
+      <!-- KPI Snapshot at Bottom of Sidebar -->
+      <div class="sidebar-snapshot">
+        <div class="snapshot-card">
+          <div class="snapshot-label">Filtered Records</div>
+          <div class="snapshot-value" id="snap-filtered">—</div>
+        </div>
+        <div class="snapshot-card">
+          <div class="snapshot-label">Total Transactions</div>
+          <div class="snapshot-value" id="snap-transactions">—</div>
+        </div>
+        <div class="snapshot-card">
+          <div class="snapshot-label">Total Customers</div>
+          <div class="snapshot-value" id="snap-customers">—</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══════ PAGES ═══════ -->
+    <main class="pages">
+
+      <!-- Executive Briefing & Strategic Alerts Panel -->
+      <section class="briefing-panel">
+        <div class="briefing-header">
+          <div class="briefing-title"><i class="fa-solid fa-bolt-lightning"></i> Executive Briefing &amp; Strategic Alerts</div>
+          <div class="briefing-time" id="briefing-update-time">Updated: Just Now</div>
+        </div>
+        <div class="briefing-content">
+          <div class="briefing-item briefing-summary">
+            <strong>CEO Briefing:</strong> Sales momentum remains strong with an active base of <span id="brief-cust">—</span> buyers. Close tracking of category discounts is advised to preserve margins.
+          </div>
+          <div class="briefing-alerts" id="briefing-alerts-container">
+            <!-- Dynamic alerts generated in JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════
+           PAGE 1 — REVENUE OVERVIEW
+      ══════════════════════════════════════════════ -->
+      <div class="page active" id="p1">
+
+        <!-- KPI Row -->
+        <section class="kpi-row">
+          <div class="kpi-card" id="kc-revenue">
+            <div class="kpi-top">
+              <div class="kpi-icon kpi-icon-blue"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+              <span class="kpi-mom" id="kpi-mom-badge">—</span>
+            </div>
+            <div class="kpi-label">Total Revenue <span class="info-tooltip" data-tooltip="Total net sales value of all cleaned transaction records."><i class="fa-solid fa-circle-info"></i></span></div>
+            <div class="kpi-val" id="kpi-revenue">—</div>
+            <div class="kpi-sub" id="sub-revenue">FY 2025 Net Sales</div>
+          </div>
+          <div class="kpi-card" id="kc-orders">
+            <div class="kpi-top">
+              <div class="kpi-icon kpi-icon-orange"><i class="fa-solid fa-receipt"></i></div>
+            </div>
+            <div class="kpi-label">Total Transactions <span class="info-tooltip" data-tooltip="The total count of order transactions executed in FY 2025."><i class="fa-solid fa-circle-info"></i></span></div>
+            <div class="kpi-val" id="kpi-orders">—</div>
+            <div class="kpi-sub" id="sub-orders">Purchase records</div>
+          </div>
+          <div class="kpi-card" id="kc-aov">
+            <div class="kpi-top">
+              <div class="kpi-icon kpi-icon-teal"><i class="fa-solid fa-basket-shopping"></i></div>
+            </div>
+            <div class="kpi-label">Avg Order Value <span class="info-tooltip" data-tooltip="Average sales revenue generated per single order transaction."><i class="fa-solid fa-circle-info"></i></span></div>
+            <div class="kpi-val" id="kpi-aov">—</div>
+            <div class="kpi-sub" id="sub-aov">Revenue / Transactions</div>
+          </div>
+          <div class="kpi-card" id="kc-disc">
+            <div class="kpi-top">
+              <div class="kpi-icon kpi-icon-purple"><i class="fa-solid fa-percent"></i></div>
+            </div>
+            <div class="kpi-label">Avg Discount Applied <span class="info-tooltip" data-tooltip="The average percentage rate of promotional discounts applied at checkout."><i class="fa-solid fa-circle-info"></i></span></div>
+            <div class="kpi-val" id="kpi-discount">—</div>
+            <div class="kpi-sub" id="sub-discount">Across all transactions</div>
+          </div>
+        </section>
+
+        <!-- Charts Row 1 -->
+        <div class="charts-row-21">
+          <div class="chart-card span2">
+            <div class="chart-header">
+              <h3>Which month drives the highest revenue?</h3>
+              <span class="chart-badge">Monthly Trend</span>
+            </div>
+            <div class="chart-wrap h280"><canvas id="c-monthly"></canvas></div>
+            <div class="insight-bar" id="ins-monthly">—</div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Which region drives the most revenue?</h3>
+              <span class="chart-badge">Region Split</span>
+            </div>
+            <div class="chart-wrap h280"><canvas id="c-region"></canvas></div>
+            <div class="insight-bar" id="ins-region">—</div>
+          </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="charts-row-12">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Which product categories generate the most revenue?</h3>
+              <span class="chart-badge">Category Revenue</span>
+            </div>
+            <div class="chart-wrap h260"><canvas id="c-category"></canvas></div>
+            <div class="insight-bar" id="ins-category">—</div>
+          </div>
+          <div class="chart-card span2">
+            <div class="chart-header">
+              <h3>Which cities are our highest-revenue markets?</h3>
+              <span class="chart-badge">Top 10 Cities</span>
+            </div>
+            <div class="chart-wrap h260"><canvas id="c-cities"></canvas></div>
+            <div class="insight-bar" id="ins-cities">—</div>
+          </div>
+        </div>
+
+        <!-- Page Insight Panel -->
+        <div class="insight-panel" id="panel-p1">
+          <div class="insight-panel-title"><i class="fa-solid fa-brain"></i> Key Insights — Revenue Overview</div>
+          <div class="insight-panel-items" id="ins-panel-p1"></div>
+        </div>
+      </div><!-- /page 1 -->
+
+      <!-- ══════════════════════════════════════════════
+           PAGE 2 — CUSTOMER BEHAVIOUR & SEGMENTATION
+      ══════════════════════════════════════════════ -->
+      <div class="page" id="p2">
+
+        <section class="kpi-row">
+          <div class="kpi-card" id="kc-cust">
+            <div class="kpi-top"><div class="kpi-icon kpi-icon-blue"><i class="fa-solid fa-users"></i></div></div>
+            <div class="kpi-label">Unique Customers <span class="info-tooltip" data-tooltip="Total number of unique, individual customer accounts transacting."><i class="fa-solid fa-circle-info"></i></span></div>
+            <div class="kpi-val" id="kpi-customers">—</div>
+            <div class="kpi-sub" id="sub-customers">Active buyers in FY 2025</div>
+          </div>
+          <div class="kpi-card" id="kc-hv">
+            <div class="kpi-top"><div class="kpi-icon kpi-icon-orange"><i class="fa-solid fa-crown"></i></div></div>
+            <div class="kpi-label">High-Value Customer % <span class="info-tooltip" data-tooltip="The proportion of customers classified as High-Value (spent > ₹200)."><i class="fa-solid fa-circle-info"></i></span></div>
+            <div class="kpi-val" id="kpi-hv-pct">—</div>
+            <div class="kpi-sub" id="sub-hv">Of total active base</div>
+          </div>
+          <div class="kpi-card" id="kc-plat">
+            <div class="kpi-top"><div class="kpi-icon kpi-icon-purple"><i class="fa-solid fa-gem"></i></div></div>
+            <div class="kpi-label">Platinum Loyalty % <span class="info-tooltip" data-tooltip="The percentage of customers holding the top-tier Platinum loyalty status."><i class="fa-solid fa-circle-info"></i></span></div>
+            <div class="kpi-val" id="kpi-plat-pct">—</div>
+            <div class="kpi-sub" id="sub-plat">Of total active base</div>
+          </div>
+          <div class="kpi-card" id="kc-freq">
+            <div class="kpi-top"><div class="kpi-icon kpi-icon-teal"><i class="fa-solid fa-repeat"></i></div></div>
+            <div class="kpi-label">Avg Purchase Frequency <span class="info-tooltip" data-tooltip="Average number of order transactions executed per unique customer."><i class="fa-solid fa-circle-info"></i></span></div>
+            <div class="kpi-val" id="kpi-freq">—</div>
+            <div class="kpi-sub" id="sub-freq">Purchases per customer</div>
+          </div>
+        </section>
+
+        <div class="charts-row-21">
+          <div class="chart-card span2">
+            <div class="chart-header">
+              <h3>Are high-value customers more loyal?</h3>
+              <span class="chart-badge">Loyalty Tier vs Avg Value</span>
+            </div>
+            <div class="chart-wrap h270"><canvas id="c-loyalty-value"></canvas></div>
+            <div class="loyalty-context-note" style="margin-top: 8px; font-size: 11.5px; line-height: 1.45; color: var(--text-2); background: var(--bg); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--orange);">
+              <strong>Analytical Context:</strong> Platinum members receive higher discount odds (up to 20% applied to 60% of transactions) which lowers single order AOV, but they yield a **6.7x higher purchase frequency**, generating the highest overall Lifetime Value (CLV).
+            </div>
+            <div class="insight-bar" id="ins-loyalty-value">—</div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Which customer segment drives the most revenue?</h3>
+              <span class="chart-badge">Segment Distribution</span>
+            </div>
+            <div class="chart-wrap h270"><canvas id="c-segment"></canvas></div>
+            <div class="insight-bar" id="ins-segment">—</div>
+          </div>
+        </div>
+
+        <div class="charts-row-12">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Which channel does each generation prefer?</h3>
+              <span class="chart-badge">Age vs Gender Revenue</span>
+            </div>
+            <div class="chart-wrap h270"><canvas id="c-age-gender"></canvas></div>
+            <div class="insight-bar" id="ins-age-gender">—</div>
+          </div>
+          <div class="chart-card span2">
+            <div class="chart-header">
+              <h3>Do frequent buyers spend more per order?</h3>
+              <span class="chart-badge">Frequency vs Spend Scatter</span>
+            </div>
+            <div class="chart-wrap h270"><canvas id="c-scatter-freq"></canvas></div>
+            <div class="insight-bar" id="ins-scatter-freq">—</div>
+          </div>
+        </div>
+
+        <div class="charts-row-11">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Which channel do our customers prefer?</h3>
+              <span class="chart-badge">Purchase Channel Split</span>
+            </div>
+            <div class="chart-wrap h250"><canvas id="c-channel"></canvas></div>
+            <div class="insight-bar" id="ins-channel">—</div>
+          </div>
+        </div>
+
+        <div class="insight-panel" id="panel-p2">
+          <div class="insight-panel-title"><i class="fa-solid fa-brain"></i> Key Insights — Customer Behaviour</div>
+          <div class="insight-panel-items" id="ins-panel-p2"></div>
+        </div>
+      </div><!-- /page 2 -->
+
+      <!-- ══════════════════════════════════════════════
+           PAGE 3 — PRODUCT & CHANNEL INTELLIGENCE
+      ══════════════════════════════════════════════ -->
+      <div class="page" id="p3">
+
+        <section class="kpi-row">
+          <div class="kpi-card" id="kc-top-cat">
+            <div class="kpi-top"><div class="kpi-icon kpi-icon-blue"><i class="fa-solid fa-star"></i></div></div>
+            <div class="kpi-label">Top Product Category</div>
+            <div class="kpi-val kpi-val-sm" id="kpi-top-cat">—</div>
+            <div class="kpi-sub">Highest revenue category</div>
+          </div>
+          <div class="kpi-card" id="kc-top-pay">
+            <div class="kpi-top"><div class="kpi-icon kpi-icon-orange"><i class="fa-solid fa-credit-card"></i></div></div>
+            <div class="kpi-label">Top Payment Method</div>
+            <div class="kpi-val kpi-val-sm" id="kpi-top-pay">—</div>
+            <div class="kpi-sub">By transaction count</div>
+          </div>
+          <div class="kpi-card" id="kc-top-chan">
+            <div class="kpi-top"><div class="kpi-icon kpi-icon-teal"><i class="fa-solid fa-store"></i></div></div>
+            <div class="kpi-label">Highest Revenue Channel</div>
+            <div class="kpi-val kpi-val-sm" id="kpi-top-chan">—</div>
+            <div class="kpi-sub">Online / In-Store / App</div>
+          </div>
+          <div class="kpi-card" id="kc-top-reg">
+            <div class="kpi-top"><div class="kpi-icon kpi-icon-purple"><i class="fa-solid fa-location-dot"></i></div></div>
+            <div class="kpi-label">Top Performing Region</div>
+            <div class="kpi-val kpi-val-sm" id="kpi-top-reg">—</div>
+            <div class="kpi-sub">By total revenue</div>
+          </div>
+        </section>
+
+        <div class="charts-row-21">
+          <div class="chart-card span2">
+            <div class="chart-header">
+              <h3>Which product sells best on which channel?</h3>
+              <span class="chart-badge">Category × Channel Heatmap</span>
+            </div>
+            <div class="heatmap-wrap" id="heatmap-cat-chan"></div>
+            <div class="insight-bar" id="ins-heatmap">—</div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Which payment method do our best customers prefer?</h3>
+              <span class="chart-badge">Payment Method Split</span>
+            </div>
+            <div class="chart-wrap h270"><canvas id="c-payment"></canvas></div>
+            <div class="insight-bar" id="ins-payment">—</div>
+          </div>
+        </div>
+
+        <div class="charts-row-12">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>What day of the week drives the most transactions?</h3>
+              <span class="chart-badge">Weekly Pattern</span>
+            </div>
+            <div class="chart-wrap h260"><canvas id="c-dow"></canvas></div>
+            <div class="insight-bar" id="ins-dow">—</div>
+          </div>
+          <div class="chart-card span2">
+            <div class="chart-header">
+              <h3>Which gender shops which product category?</h3>
+              <span class="chart-badge">Category × Gender</span>
+            </div>
+            <div class="chart-wrap h260"><canvas id="c-cat-gender"></canvas></div>
+            <div class="insight-bar" id="ins-cat-gender">—</div>
+          </div>
+        </div>
+
+        <div class="charts-row-11">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Does higher quantity lead to lower unit prices?</h3>
+              <span class="chart-badge">Qty vs Unit Price Scatter</span>
+            </div>
+            <div class="chart-wrap h250"><canvas id="c-qty-price"></canvas></div>
+            <div class="insight-bar" id="ins-qty-price">—</div>
+          </div>
+        </div>
+
+        <div class="insight-panel" id="panel-p3">
+          <div class="insight-panel-title"><i class="fa-solid fa-brain"></i> Key Insights — Product &amp; Channel</div>
+          <div class="insight-panel-items" id="ins-panel-p3"></div>
+        </div>
+      </div><!-- /page 3 -->
+
+      <!-- ══════════════════════════════════════════════
+           PAGE 4 — CFO STRATEGIC INSIGHTS
+      ══════════════════════════════════════════════ -->
+      <div class="page" id="p4">
+
+        <!-- CFO Financial KPI Row -->
+        <section class="kpi-row">
+          <div class="kpi-card" id="kc-gross-profit">
+            <div class="kpi-top">
+              <div class="kpi-icon kpi-icon-blue"><i class="fa-solid fa-sack-dollar"></i></div>
+            </div>
+            <div class="kpi-label">Gross Profit <span class="info-tooltip" data-tooltip="Total sales revenue minus simulated Cost of Goods Sold (COGS)."><i class="fa-solid fa-circle-info"></i></span></div>
+            <div class="kpi-val" id="kpi-gross-profit">—</div>
+            <div class="kpi-sub" id="sub-gross-profit">Total revenue minus COGS</div>
+          </div>
+          <div class="kpi-card" id="kc-net-profit">
+            <div class="kpi-top">
+              <div class="kpi-icon kpi-icon-orange"><i class="fa-solid fa-wallet"></i></div>
+            </div>
+            <div class="kpi-label">Net Profit <span class="info-tooltip" data-tooltip="Remaining profit after subtracting operating overhead costs from Gross Profit."><i class="fa-solid fa-circle-info"></i></span></div>
+            <div class="kpi-val" id="kpi-net-profit">—</div>
+            <div class="kpi-sub" id="sub-net-profit">Operating income post costs</div>
+          </div>
+          <div class="kpi-card" id="kc-gross-margin">
+            <div class="kpi-top">
+              <div class="kpi-icon kpi-icon-teal"><i class="fa-solid fa-percent"></i></div>
+            </div>
+            <div class="kpi-label">Gross Margin % <span class="info-tooltip" data-tooltip="Gross profit divided by total revenue, representing product-level margin efficiency."><i class="fa-solid fa-circle-info"></i></span></div>
+            <div class="kpi-val" id="kpi-gross-margin">—</div>
+            <div class="kpi-sub" id="sub-gross-margin">Gross profit / revenue</div>
+          </div>
+          <div class="kpi-card" id="kc-net-margin">
+            <div class="kpi-top">
+              <div class="kpi-icon kpi-icon-purple"><i class="fa-solid fa-chart-pie"></i></div>
+            </div>
+            <div class="kpi-label">Net Margin % <span class="info-tooltip" data-tooltip="Net profit divided by total revenue, reflecting final bottom-line profitability."><i class="fa-solid fa-circle-info"></i></span></div>
+            <div class="kpi-val" id="kpi-net-margin">—</div>
+            <div class="kpi-sub" id="sub-net-margin">Net profit / revenue</div>
+          </div>
+        </section>
+
+        <!-- Financial Performance and Targets Grid -->
+        <div class="charts-row-21">
+          <!-- Targets vs Actuals -->
+          <div class="chart-card span2">
+            <div class="chart-header">
+              <h3>FY 2025 Targets vs Actuals Performance</h3>
+              <span class="chart-badge">Budget Progress</span>
+            </div>
+            <div class="targets-container" id="targets-progress-bars">
+              <!-- Render target bullet progress bars dynamically -->
+            </div>
+            <div class="insight-bar" id="ins-targets-progress">—</div>
+          </div>
+          <!-- Category Profitability -->
+          <div class="chart-card" style="width: 580px;">
+            <div class="chart-header">
+              <h3>Which categories are most profitable?</h3>
+              <span class="chart-badge">Category Net Profit</span>
+            </div>
+            <div class="chart-wrap h280"><canvas id="c-category-profit"></canvas></div>
+            <div class="insight-bar" id="ins-category-profit">—</div>
+          </div>
+        </div>
+
+        <!-- Forecasting Row -->
+        <div class="charts-row-11">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>3-Month Revenue &amp; Transaction Forecast</h3>
+              <span class="chart-badge">Holt's Linear Forecast (Q1 2026)</span>
+            </div>
+            <div class="chart-wrap h280"><canvas id="c-forecast"></canvas></div>
+            <div class="insight-bar" id="ins-forecast">—</div>
+          </div>
+        </div>
+
+        <!-- Geographic Intelligence table -->
+        <div class="charts-row-11">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Geographic Performance Leaderboard</h3>
+              <span class="chart-badge">City-Level Analytics</span>
+            </div>
+            <div class="table-wrap">
+              <table class="leaderboard-table" id="geo-leaderboard-table">
+                <thead>
+                  <tr>
+                    <th>City</th>
+                    <th>Region</th>
+                    <th>Transactions</th>
+                    <th>Revenue</th>
+                    <th>Gross Profit</th>
+                    <th>Avg Order Value (AOV)</th>
+                    <th>Margin %</th>
+                  </tr>
+                </thead>
+                <tbody id="geo-leaderboard-body">
+                  <!-- Dynamic content -->
+                </tbody>
+              </table>
+            </div>
+            <div class="insight-bar" id="ins-geo-leaderboard">—</div>
+          </div>
+        </div>
+
+        <!-- CFO Strategic Risk & Opportunity Assessment Card -->
+        <div class="charts-row-11">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>CFO Strategic Risk &amp; Opportunity Assessment</h3>
+              <span class="chart-badge">Board Briefing</span>
+            </div>
+            <div class="risks-opps-container" id="risks-opps-container">
+              <!-- Rendered dynamically in JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="insight-panel" id="panel-p4">
+          <div class="insight-panel-title"><i class="fa-solid fa-brain"></i> Key Insights — CFO Strategic View</div>
+          <div class="insight-panel-items" id="ins-panel-p4"></div>
+        </div>
+
+        <!-- Disclaimer Note -->
+        <div class="disclaimer-note" style="margin-top: 24px; font-size: 11px; color: var(--text-3); text-align: center; font-style: italic;">
+          * Disclaimer: Profitability estimates, forecasted metrics, retention/churn calculations, and target budgets are simulated using model assumptions for demonstration purposes, rather than raw transaction ledgers.
+        </div>
+
+      </div><!-- /page 4 -->
+
+    </main>
+  </div><!-- /workspace -->
+</div><!-- /shell -->
+
+<script src="app.js"></script>
+</body>
+</html>
