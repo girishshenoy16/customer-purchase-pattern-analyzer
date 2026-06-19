@@ -173,7 +173,7 @@ Execute the Python data generation script to construct a synthetic dataset of 10
 python scripts/generate_data.py
 ```
 *Output files generated:*
-- [customer_purchase_data.csv](file:///d:/Projects/Masters/Data%20Analyst/Customer%20Purchase%20Pattern%20Analyzer/data/raw/customer_purchase_data.csv) (106,050 rows of raw transactional records).
+- customer_purchase_data.csv (106,050 rows of raw transactional records).
 
 ### Step 5: Run the Analytics Data Pipeline
 Execute the Python ETL script to cleanse raw transactions, analyze customer purchase patterns (calculating metrics like AOV, Repeat Purchase Rate, and Customer Lifetime Value), model category profitability margins, forecast transaction trends, and generate the aggregate data assets:
@@ -181,8 +181,8 @@ Execute the Python ETL script to cleanse raw transactions, analyze customer purc
 python scripts/analyze_data.py
 ```
 *Output files generated:*
-- [clean_customer_purchase_data.csv](file:///d:/Projects/Masters/Data%20Analyst/Customer%20Purchase%20Pattern%20Analyzer/data/processed/clean_customer_purchase_data.csv) (Cleared duplicates, Normalised Date/Text columns, resolved NULL occupations).
-- [data.json](file:///d:/Projects/Masters/Data%20Analyst/Customer%20Purchase%20Pattern%20Analyzer/docs/data.json) (Pre-grouped dimensions serving frontend charts).
+- clean_customer_purchase_data.csv (Cleared duplicates, Normalised Date/Text columns, resolved NULL occupations).
+- data.json   (Pre-grouped dimensions serving frontend charts).
 
 ### Step 6: Launch the Dashboard
 To prevent browser CORS security blocks when loading the local `data.json` file, run a simple local web server from the project directory:
